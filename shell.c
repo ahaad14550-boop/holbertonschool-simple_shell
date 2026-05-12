@@ -6,12 +6,12 @@
 #include <string.h>
 
 /**
- * main - entry point for simple shell
- * @ac: argument count
+ * main - Entry point for simple shell 0.2
+ * @ac: argument count (unused)
  * @av: argument vector
  * @env: environment variables
  *
- * Return: 0 on success
+ * Return: Always 0 on success.
  */
 int main(int ac, char **av, char **env)
 {
@@ -36,16 +36,19 @@ int main(int ac, char **av, char **env)
 				write(STDOUT_FILENO, "\n", 1);
 			break;
 		}
+
 		i = 0;
 		token = strtok(line, " \n\t\r");
-		while (token != NULL)
+		while (token != NULL && i < 1023)
 		{
 			argv[i++] = token;
 			token = strtok(NULL, " \n\t\r");
 		}
 		argv[i] = NULL;
+
 		if (argv[0] == NULL)
 			continue;
+
 		child_pid = fork();
 		if (child_pid == 0)
 		{
