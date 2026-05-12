@@ -6,11 +6,13 @@
 #include <string.h>
 
 /**
- * main - Entry point for simple shell 0.2
+ * main - entry point for the simple shell program
  * @ac: argument count (unused)
- * @av: argument vector
+ * @av: argument vector containing program name
  * @env: environment variables
  *
+ * Description: A basic shell that reads input, tokenizes it,
+ * and executes the command using fork and execve.
  * Return: Always 0 on success.
  */
 int main(int ac, char **av, char **env)
@@ -59,6 +61,8 @@ int main(int ac, char **av, char **env)
 				exit(EXIT_FAILURE);
 			}
 		}
+		else if (child_pid < 0)
+			perror("fork");
 		else
 			wait(&status);
 	}
