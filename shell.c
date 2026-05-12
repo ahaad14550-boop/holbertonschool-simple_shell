@@ -6,21 +6,22 @@
 #include <string.h>
 
 /**
- * main - Simple Shell 0.1 with robust space handling
- * @ac: arg count
- * @av: arg vector
- * @env: environment
- * Return: 0
+ * main - entry point for simple shell
+ * @ac: argument count
+ * @av: argument vector
+ * @env: environment variables
+ *
+ * Return: 0 on success
  */
 int main(int ac, char **av, char **env)
 {
 	char *line = NULL;
 	size_t len = 0;
 	ssize_t nread;
-	int status;
+	int status, i;
 	pid_t child_pid;
 	char *token;
-	char *argv[2];
+	char *argv[1024];
 
 	(void)ac;
 	while (1)
@@ -35,37 +36,28 @@ int main(int ac, char **av, char **env)
 				write(STDOUT_FILENO, "\n", 1);
 			break;
 		}
-
-		
+		i = 0;
 		token = strtok(line, " \n\t\r");
-		
-		
-		if (token == NULL)
-			continue;
-
-		argv[0] = token;
-		argv[1] = NULL;
-
-		child_pid = fork();
-		if (child_pid == -1)
+		while (token != NULL)
 		{
-			perror("fork");
-			continue;
+			argv[i++] = token;
+			token = strtok(NULL, " \n\t\r");
 		}
+		argv[i] = NULL;
+		if (argv[0] == NULL)
+			continue;
+		child_pid = fork();
 		if (child_pid == 0)
 		{
 			if (execve(argv[0], argv, env) == -1)
 			{
-				
 				perror(av[0]);
 				free(line);
 				exit(EXIT_FAILURE);
 			}
 		}
 		else
-		{
 			wait(&status);
-		}
 	}
 	free(line);
 	return (0);
