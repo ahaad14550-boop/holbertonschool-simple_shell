@@ -1,0 +1,8 @@
+hsh
+*.out
+app_shell
+*~
+.*.swp
+\#*\#
+.vscode/
+.idea/
