@@ -64,7 +64,7 @@ char *find_path(char *cmd)
 }
 
 /**
- * main - simple shell 0.4 with correct dynamic exit status
+ * main - simple shell 1.0 with exit and env built-ins
  * @ac: arg count
  * @av: arg vector
  * @env: environment
@@ -97,6 +97,13 @@ int main(int ac, char **av, char **env)
 		{
 			free(line);
 			exit(status);
+		}
+		if (strcmp(argv[0], "env") == 0)
+		{
+			for (i = 0; env[i] != NULL; i++)
+				printf("%s\n", env[i]);
+			status = 0;
+			continue;
 		}
 		full_path = find_path(argv[0]);
 		if (full_path)
