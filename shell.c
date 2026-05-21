@@ -64,7 +64,7 @@ char *find_path(char *cmd)
 }
 
 /**
- * main - simple shell 0.3 with correct error format
+ * main - simple shell 0.4 with exit built-in
  * @ac: arg count
  * @av: arg vector
  * @env: environment
@@ -97,6 +97,11 @@ int main(int ac, char **av, char **env)
 			argv[++i] = strtok(NULL, " \n\t\r");
 		if (!argv[0])
 			continue;
+		if (strcmp(argv[0], "exit") == 0)
+		{
+			free(line);
+			exit(0);
+		}
 		full_path = find_path(argv[0]);
 		if (full_path)
 		{
@@ -113,7 +118,10 @@ int main(int ac, char **av, char **env)
 		{
 			fprintf(stderr, "%s: %d: %s: not found\n", av[0], count, argv[0]);
 			if (!isatty(STDIN_FILENO))
-				{ free(line); exit(127); }
+			{
+				free(line);
+				exit(127);
+			}
 		}
 	}
 	free(line);
