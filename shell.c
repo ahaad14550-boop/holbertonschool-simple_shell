@@ -64,18 +64,18 @@ char *find_path(char *cmd)
 }
 
 /**
- * main - simple shell 0.4 with exit built-in
+ * main - simple shell 0.4 with correct dynamic exit status
  * @ac: arg count
  * @av: arg vector
  * @env: environment
- * Return: 0
+ * Return: last command exit status
  */
 int main(int ac, char **av, char **env)
 {
 	char *line = NULL, *full_path;
 	size_t len = 0;
 	ssize_t nread;
-	int i, count = 0;
+	int i, count = 0, status = 0, wstatus;
 	char *argv[1024];
 
 	(void)ac;
@@ -86,11 +86,7 @@ int main(int ac, char **av, char **env)
 			write(STDOUT_FILENO, "#cisfun$ ", 9);
 		nread = getline(&line, &len, stdin);
 		if (nread == -1)
-		{
-			if (isatty(STDIN_FILENO))
-				write(STDOUT_FILENO, "\n", 1);
 			break;
-		}
 		i = 0;
 		argv[i] = strtok(line, " \n\t\r");
 		while (argv[i])
@@ -100,7 +96,7 @@ int main(int ac, char **av, char **env)
 		if (strcmp(argv[0], "exit") == 0)
 		{
 			free(line);
-			exit(0);
+			exit(status);
 		}
 		full_path = find_path(argv[0]);
 		if (full_path)
@@ -108,22 +104,22 @@ int main(int ac, char **av, char **env)
 			if (fork() == 0)
 			{
 				if (execve(full_path, argv, env) == -1)
-					exit(127);
+					exit(2);
 			}
 			else
-				wait(NULL);
+			{
+				wait(&wstatus);
+				if (WIFEXITED(wstatus))
+					status = WEXITSTATUS(wstatus);
+			}
 			free(full_path);
 		}
 		else
 		{
 			fprintf(stderr, "%s: %d: %s: not found\n", av[0], count, argv[0]);
-			if (!isatty(STDIN_FILENO))
-			{
-				free(line);
-				exit(127);
-			}
+			status = 127;
 		}
 	}
 	free(line);
-	return (0);
+	return (status);
 }
