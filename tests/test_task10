@@ -1,0 +1,34 @@
+#!/bin/bash
+# Task 10: no strtok
+SHELL=./hsh
+PASS=0
+FAIL=0
+
+check() {
+    if [ "$1" = "$2" ]; then
+        echo "PASS: $3"
+        PASS=$((PASS + 1))
+    else
+        echo "FAIL: $3"
+        echo "  GOT:      $1"
+        echo "  EXPECTED: $2"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+result=$(echo "echo Hello" | $SHELL 2>&1)
+check "$result" "Hello" "single argument"
+
+result=$(echo "echo Hello World" | $SHELL 2>&1)
+check "$result" "Hello World" "multiple arguments"
+
+result=$(echo "   echo Hello" | $SHELL 2>&1)
+check "$result" "Hello" "leading spaces"
+
+result=$(echo "echo Hello   World" | $SHELL 2>&1)
+check "$result" "Hello   World" "multiple spaces between args"
+
+result=$(echo "" | $SHELL 2>&1)
+check "$?" "0" "empty input"
+
+echo "PASSED: $PASS | FAILED: $FAIL"

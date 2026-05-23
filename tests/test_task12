@@ -1,0 +1,35 @@
+#!/bin/bash
+# Task 12: Ctrl+C handling
+SHELL=./hsh
+PASS=0
+FAIL=0
+
+check() {
+    if [ "$1" = "$2" ]; then
+        echo "PASS: $3"
+        PASS=$((PASS + 1))
+    else
+        echo "FAIL: $3"
+        echo "  GOT:      $1"
+        echo "  EXPECTED: $2"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+# Test shell doesn't exit on SIGINT
+$SHELL <<'EOF' &
+sleep 10
+EOF
+PID=$!
+sleep 0.5
+kill -INT $PID 2>/dev/null
+sleep 0.5
+kill -0 $PID 2>/dev/null
+check "$?" "0" "shell stays alive after Ctrl+C"
+kill $PID 2>/dev/null
+
+# Test normal exit still works after SIGINT
+result=$(printf "" | $SHELL 2>&1)
+check "$?" "0" "shell exits normally after signal test"
+
+echo "PASSED: $PASS | FAILED: $FAIL"

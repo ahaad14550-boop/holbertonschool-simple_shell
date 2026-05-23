@@ -1,0 +1,32 @@
+#!/bin/bash
+# Task 9: custom getline
+SHELL=./hsh
+PASS=0
+FAIL=0
+
+check() {
+    if [ "$1" = "$2" ]; then
+        echo "PASS: $3"
+        PASS=$((PASS + 1))
+    else
+        echo "FAIL: $3"
+        echo "  GOT:      $1"
+        echo "  EXPECTED: $2"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+result=$(echo "echo Hello" | $SHELL 2>&1)
+check "$result" "Hello" "reads single line"
+
+result=$(printf "echo Hello\necho World\n" | $SHELL 2>&1)
+check "$(echo "$result" | grep -c "Hello")" "1" "reads multiple lines"
+check "$(echo "$result" | grep -c "World")" "1" "reads second line"
+
+result=$(echo "" | $SHELL 2>&1)
+check "$?" "0" "handles empty input"
+
+result=$(printf "echo A\n\necho B\n" | $SHELL 2>&1)
+check "$(echo "$result" | grep -c "A")" "1" "handles empty line between commands"
+
+echo "PASSED: $PASS | FAILED: $FAIL"

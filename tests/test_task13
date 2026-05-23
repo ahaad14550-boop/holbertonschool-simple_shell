@@ -1,0 +1,37 @@
+#!/bin/bash
+# Task 13: setenv and unsetenv
+SHELL=./hsh
+PASS=0
+FAIL=0
+
+check() {
+    if [ "$1" = "$2" ]; then
+        echo "PASS: $3"
+        PASS=$((PASS + 1))
+    else
+        echo "FAIL: $3"
+        echo "  GOT:      $1"
+        echo "  EXPECTED: $2"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
+result=$(printf "setenv TEST hello\nenv\n" | $SHELL 2>&1)
+check "$(echo "$result" | grep -c "TEST=hello")" "1" "setenv creates new variable"
+
+result=$(printf "setenv HOME /tmp\nenv\n" | $SHELL 2>&1)
+check "$(echo "$result" | grep -c "HOME=/tmp")" "1" "setenv modifies existing variable"
+
+result=$(printf "setenv\n" | $SHELL 2>&1)
+check "$(echo "$result" | grep -c "setenv")" "1" "setenv no args prints error"
+
+result=$(printf "setenv TEST hello\nunsetenv TEST\nenv\n" | $SHELL 2>&1)
+check "$(echo "$result" | grep -c "TEST=hello")" "0" "unsetenv removes variable"
+
+result=$(printf "unsetenv\n" | $SHELL 2>&1)
+check "$(echo "$result" | grep -c "unsetenv")" "1" "unsetenv no args prints error"
+
+result=$(printf "unsetenv NONEXISTENT\n" | $SHELL 2>&1)
+check "$?" "0" "unsetenv nonexistent variable"
+
+echo "PASSED: $PASS | FAILED: $FAIL"
