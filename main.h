@@ -15,4 +15,10 @@ char *_getenv(const char *name);
 char *build_path(char *dir, char *cmd);
 char *get_path(char *command);
 
+
+
+
+char *_getenv(const char *name);
+void _setenv(char *name, char *value);
+int builtin_cd(char **argv);
 #endif
