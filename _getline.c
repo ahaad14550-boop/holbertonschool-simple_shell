@@ -1,59 +1,101 @@
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
+#include <unistd.h>
 
-#define BUF_SIZE 1024
+extern char **environ;
 
 /**
- * _getline - custom getline function using static buffer.
- * @lineptr: buffer that stores the input line.
- * @n: size of lineptr.
- * @stream: input stream (ignored but kept for prototype compatibility).
- * Return: number of bytes read, or -1 on failure/EOF.
+ * _find_env - Finds the index of an environment variable.
+ * @name: The name of the variable to search for.
+ *
+ * Return: The index of the variable if found, or -1 if not found.
  */
-ssize_t _getline(char **lineptr, size_t *n, FILE *stream)
+int _find_env(const char *name)
 {
-	static char buffer[BUF_SIZE];
-	static size_t buf_pos;
-	static size_t buf_size;
-	size_t i = 0;
-	char c;
-	(void)stream;
+	int i = 0;
+	size_t len = 0;
 
-	if (lineptr == NULL || n == NULL)
+	if (!name)
 		return (-1);
-	if (*lineptr == NULL || *n == 0)
+
+	while (name[len])
+		len++;
+
+	while (environ[i])
 	{
-		*n = BUF_SIZE;
-		*lineptr = malloc(*n);
-		if (*lineptr == NULL)
-			return (-1);
+		if (strncmp(environ[i], name, len) == 0 && environ[i][len] == '=')
+			return (i);
+		i++;
 	}
-	while (1)
+	return (-1);
+}
+
+/**
+ * my_setenv - Initializes a new environment variable, or modifies an existing.
+ * @args: Array of arguments (args[1] is VARIABLE, args[2] is VALUE).
+ *
+ * Return: 0 on success, -1 on failure.
+ */
+int my_setenv(char **args)
+{
+	int idx, i = 0, len1 = 0, len2 = 0;
+	char *new_var;
+
+	if (!args[1] || !args[2])
 	{
-		if (buf_pos >= buf_size)
-		{
-			buf_size = read(STDIN_FILENO, buffer, BUF_SIZE);
-			buf_pos = 0;
-			if (buf_size <= 0)
-			{
-				if (i == 0)
-					return (-1);
-				break;
-			}
-		}
-		c = buffer[buf_pos++];
-		if (i >= *n - 1)
-		{
-			*n += BUF_SIZE;
-			*lineptr = realloc(*lineptr, *n);
-			if (*lineptr == NULL)
-				return (-1);
-		}
-		(*lineptr)[i++] = c;
-		if (c == '\n')
-			break;
+		write(STDERR_FILENO, "setenv: Invalid arguments\n", 26);
+		return (-1);
 	}
-	(*lineptr)[i] = '\0';
-	return (i);
+	while (args[1][len1])
+		len1++;
+	while (args[2][len2])
+		len2++;
+	new_var = malloc(len1 + len2 + 2);
+	if (!new_var)
+		return (-1);
+	for (i = 0; i < len1; i++)
+		new_var[i] = args[1][i];
+	new_var[i++] = '=';
+	for (idx = 0; idx < len2; idx++)
+		new_var[i++] = args[2][idx];
+	new_var[i] = '\0';
+	idx = _find_env(args[1]);
+	if (idx != -1)
+		environ[idx] = new_var;
+	else
+	{
+		i = 0;
+		while (environ[i])
+			i++;
+		environ[i] = new_var;
+		environ[i + 1] = NULL;
+	}
+	return (0);
+}
+
+/**
+ * my_unsetenv - Removes an environment variable.
+ * @args: Array of arguments (args[1] is VARIABLE).
+ *
+ * Return: 0 on success, -1 on failure.
+ */
+int my_unsetenv(char **args)
+{
+	int idx, i;
+
+	if (!args[1])
+	{
+		write(STDERR_FILENO, "unsetenv: Invalid arguments\n", 28);
+		return (-1);
+	}
+
+	idx = _find_env(args[1]);
+	if (idx == -1)
+		return (0);
+
+	for (i = idx; environ[i] != NULL; i++)
+	{
+		environ[i] = environ[i + 1];
+	}
+	return (0);
 }
