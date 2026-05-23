@@ -3,7 +3,26 @@
 hsh \- Simple UNIX command line interpreter
 .SH SYNOPSIS
 .B ./hsh
+.RI [ command ]
 .SH DESCRIPTION
-hsh is a command line interpreter that executes commands from standard input or files.
+hsh is a simple UNIX command line interpreter that replicates the core behavior of /bin/sh. Supports interactive and non-interactive modes.
+.SH BUILT-IN COMMANDS
+.TP
+.B exit
+Exit the shell.
+.TP
+.B env
+Print environment variables.
+.TP
+.B cd [DIRECTORY]
+Change current directory. Defaults to HOME if no argument.
+.SH ERROR HANDLING
+.nf
+./hsh: 1: command: not found
+.fi
+.SH SEE ALSO
+.BR sh (1),
+.BR execve (2),
+.BR fork (2)
 .SH AUTHORS
-Ahad Alqahtani <ahaad.14450@gmail.com>
+Ahad Alqahtani <ahaad.14550@gmail.com>
