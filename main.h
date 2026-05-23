@@ -16,5 +16,6 @@ char *find_path(char *cmd);
 char *_getenv(const char *name);
 void _setenv(char *name, char *value);
 int builtin_cd(char **argv);
-
+int execute_cmd(char **argv, char **av, int count, char **env);
+int handle_operators(char *line, char **av, int count, char **env);
 #endif
